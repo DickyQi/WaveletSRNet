@@ -2,6 +2,7 @@ import torch
 import torch.nn as nn
 import math
 import pickle
+import os
 from torch.autograd import Variable
 
 def loss_MSE(x, y, size_average=False):
@@ -42,11 +43,10 @@ class WaveletTransform(nn.Module):
         
         for m in self.modules():
             if isinstance(m, nn.Conv2d) or isinstance(m, nn.ConvTranspose2d):
-                f = file(params_path,'rb')
-                dct = pickle.load(f)
-                f.close()
+                with open(params_path,'rb') as f:
+                    dct = pickle.load(f, encoding='latin1')
                 m.weight.data = torch.from_numpy(dct['rec%d' % ks])
-                m.weight.requires_grad = False  
+                m.weight.requires_grad = False
                            
     def forward(self, x): 
         if self.dec:

@@ -25,12 +25,12 @@ parser.add_argument('--test', action='store_true', help='enables test during tra
 parser.add_argument('--mse_avg', action='store_true', help='enables mse avg')
 parser.add_argument('--num_layers_res', type=int, help='number of the layers in residual block', default=2)
 parser.add_argument('--nrow', type=int, help='number of the rows to save images', default=10)
-parser.add_argument('--trainfiles', default="path/celeba/train.list", type=str, help='the list of training files')
-parser.add_argument('--dataroot', default="path/celeba", type=str, help='path to dataset')
-parser.add_argument('--testfiles', default="path/test.list", type=str, help='the list of training files')
-parser.add_argument('--testroot', default="path/celeba", type=str, help='path to dataset')
-parser.add_argument('--trainsize', type=int, help='number of training data', default=162770)
-parser.add_argument('--testsize', type=int, help='number of testing data', default=19962)
+parser.add_argument('--trainfiles', default="images/celeba.list", type=str, help='the list of training files')
+parser.add_argument('--dataroot', default="images/new", type=str, help='path to dataset')
+parser.add_argument('--testfiles', default="images/celeba_test.list", type=str, help='the list of training files')
+parser.add_argument('--testroot', default="images/new", type=str, help='path to dataset')
+parser.add_argument('--trainsize', type=int, help='number of training data', default=90000)
+parser.add_argument('--testsize', type=int, help='number of testing data', default=7876)
 parser.add_argument('--workers', type=int, help='number of data loading workers', default=2)
 parser.add_argument('--batchSize', type=int, default=64, help='input batch size')
 parser.add_argument('--test_batchSize', type=int, default=64, help='test batch size')
@@ -166,11 +166,12 @@ def main():
                     wavelets = forward_parallel(srnet, input, opt.ngpu)                    
                     prediction = wavelet_rec(wavelets)
                     mse = criterion_m(prediction, target)
-                    psnr = 10 * log10(1 / (mse.data[0]) )
+                    psnr = 10 * log10(1 / (mse.item() ) )
                     avg_psnr += psnr
-                                                    
-                    save_images(prediction, "Epoch_{:03d}_Iter_{:06d}_{:02d}_o.jpg".format(epoch, iteration, titer), 
-                                path=opt.outf, nrow=opt.nrow)
+                    
+                    if titer % 10 is 0:
+                        save_images(prediction, "Epoch_{:03d}_Iter_{:06d}_{:02d}_o.jpg".format(epoch, iteration, titer),
+                                    path=opt.outf, nrow=opt.nrow)
                     
                     
                 print("===> Avg. PSNR: {:.4f} dB".format(avg_psnr / len(test_data_loader)))
@@ -202,13 +203,12 @@ def main():
             optimizer_sr.zero_grad()    
             loss.backward()                       
             optimizer_sr.step()
-            
-            info = "===> Epoch[{}]({}/{}): time: {:4.4f}:".format(epoch, iteration, len(train_data_loader), time.time()-start_time)
-            info += "Rec: {:.4f}, {:.4f}, {:.4f}, Texture: {:.4f}".format(loss_lr.data[0], loss_sr.data[0], 
-                                loss_img.data[0], loss_textures.data[0])            
-                          
-            print(info)
-             
+
+            if iteration % 100 == 0:
+                info = "===> Epoch[{}]({}/{}): time: {:4.4f}:".format(epoch, iteration, len(train_data_loader), time.time()-start_time)
+                info += "Rec: {:.4f}, {:.4f}, {:.4f}, Texture: {:.4f}".format(loss_lr.item(), loss_sr.item(),
+                                loss_img.item(), loss_textures.item())
+                print(info)
 
 def forward_parallel(net, input, ngpu):
     if ngpu > 1:
@@ -217,10 +217,10 @@ def forward_parallel(net, input, ngpu):
         return net(input)
             
 def save_checkpoint(model, epoch, iteration, prefix=""):
-    model_out_path = "model/" + prefix +"model_epoch_{}_iter_{}.pth".format(epoch, iteration)
+    model_out_path = "model/x2/" + prefix +"model_epoch_{}_iter_{}.pth".format(epoch, iteration)
     state = {"epoch": epoch ,"model": model}
-    if not os.path.exists("model/"):
-        os.makedirs("model/")
+    if not os.path.exists("model/x2"):
+        os.makedirs("model/x2")
 
     torch.save(state, model_out_path)
         

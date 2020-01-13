@@ -14,7 +14,7 @@ def readlinesFromFile(path, datasize):
     print("Load from file %s" % path)
     f=open(path)
     data=[]    
-    for idx in xrange(0, datasize):
+    for idx in range(0, datasize):
       line = f.readline()
       data.append(line)      
     
@@ -29,7 +29,7 @@ def loadFromFile(path, datasize):
     f=open(path)
     data=[]
     label=[]
-    for idx in xrange(0, datasize):
+    for idx in range(0, datasize):
       line = f.readline().split()
       data.append(line[0])         
       label.append(line[1])
