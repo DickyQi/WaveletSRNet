@@ -25,13 +25,13 @@ parser.add_argument('--test', action='store_true', help='enables test during tra
 parser.add_argument('--mse_avg', action='store_true', help='enables mse avg')
 parser.add_argument('--num_layers_res', type=int, help='number of the layers in residual block', default=2)
 parser.add_argument('--nrow', type=int, help='number of the rows to save images', default=10)
-parser.add_argument('--trainfiles', default="images/celeba.list", type=str, help='the list of training files')
+parser.add_argument('--trainfiles', default="images/train.list", type=str, help='the list of training files')
 parser.add_argument('--dataroot', default="images/new", type=str, help='path to dataset')
-parser.add_argument('--testfiles', default="images/celeba_test.list", type=str, help='the list of training files')
+parser.add_argument('--testfiles', default="images/test.list", type=str, help='the list of training files')
 parser.add_argument('--testroot', default="images/new", type=str, help='path to dataset')
-parser.add_argument('--trainsize', type=int, help='number of training data', default=90000)
-parser.add_argument('--testsize', type=int, help='number of testing data', default=7876)
-parser.add_argument('--workers', type=int, help='number of data loading workers', default=2)
+parser.add_argument('--trainsize', type=int, help='number of training data', default=130000)
+parser.add_argument('--testsize', type=int, help='number of testing data', default=3175)
+parser.add_argument('--workers', type=int, help='number of data loading workers', default=16)
 parser.add_argument('--batchSize', type=int, default=64, help='input batch size')
 parser.add_argument('--test_batchSize', type=int, default=64, help='test batch size')
 parser.add_argument('--save_iter', type=int, default=10, help='the interval iterations for saving models')
@@ -204,7 +204,7 @@ def main():
             loss.backward()                       
             optimizer_sr.step()
 
-            if iteration % 100 == 0:
+            if iteration % opt.test_iter == 0:
                 info = "===> Epoch[{}]({}/{}): time: {:4.4f}:".format(epoch, iteration, len(train_data_loader), time.time()-start_time)
                 info += "Rec: {:.4f}, {:.4f}, {:.4f}, Texture: {:.4f}".format(loss_lr.item(), loss_sr.item(),
                                 loss_img.item(), loss_textures.item())
